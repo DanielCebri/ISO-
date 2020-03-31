@@ -1,6 +1,6 @@
 # Solucion a practica sobre guardar información de un ordenador y llevarla a otro
 
-```
+```Powershell
 Function showmenu {
     Clear-Host
     Write-Host "Starting Menu..."
