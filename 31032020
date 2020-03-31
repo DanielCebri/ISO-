@@ -1,0 +1,95 @@
+# Solucion a practica sobre guardar información de un ordenador y llevarla a otro
+
+```
+Function showmenu {
+    Clear-Host
+    Write-Host "Starting Menu..."
+    Write-Host "1. Guardar informacion del Sistema"
+    Write-Host "2. Detectar si se abren procesos nuevos"
+    Write-Host "3. Guardar informacion Active Directory"
+    Write-Host "4. Instalar Aplicaciones(necesitas paso 1)"
+    Write-Host "5. Instalar Usuarios Recursos en Active Directory (necesitamos paso 3)"
+    Write-Host "6. Salir"
+}
+
+showmenu
+
+while(($inp = Read-Host -Prompt "Select an option") -ne "5"){
+
+switch($inp){
+        1 {
+            Clear-Host
+            Get-Package | Select-Object Name
+            (Get-WmiObject -Class Win32_Product).name
+            Get-WmiObject -query "select name from win32_product" | select Name >> Programas.txt
+            Get-HotFix | Select-Object HotFixID
+            Get-Package | Select-Object Name | Where-Object Name -match "Actualización" | Format-Custom >> Actualizaciones.txt
+            Get-LocalUser >> Usuarios.txt
+            gsmbs >> Ccompartida.txt
+            pause;
+            break
+
+        }
+        2 {
+            gps > archivo1.txt
+
+            While(1) 
+            {
+            $prom1=Get-Content archivo1.txt
+            $prom2=gps
+            if ($prom1 -eq $prom2)
+            {
+
+            }
+            else{
+            "Nuevo Proceso Abierto"
+            }
+            Start-sleep -seconds 6
+            }
+            pause;
+            break
+        }
+        3 {
+            Clear-Host
+            $adsi = [ADSI]"WinNT://$env:COMPUTERNAME"
+            $adsi.Children | Where-Object {$_.SchemaClassName  -eq 'user'} | Select-Object name |out-file usuariosAD.txt
+            Get-Package | Select-Object name | Out-File aplicaciones.txt
+            (Get-SmbShare).Path | ls -Force | gi -Force | select FullName, @{n="Attr";e={[string]$_.attributes}} |out-file carpetas.txt
+            pause;
+            break
+
+        }
+        4 {
+            Clear-Host
+            foreach ($item in gc Programas.txt)
+            {
+                Install-Package -name $item
+            }
+            pause;
+            break
+
+        }
+        5 {
+            Clear-Host
+            foreach($elemento in Get-Content .\usuariosAD.txt)
+            {
+                $elemento
+                New-ADUSer -Name $elemento -Sam $elemento -Path "OU=PRUEBA,DC=Dominio,DC=Local" -AccountPassword (ConvertTo-SecureString "Contraseña" -AsPlainText -force) -Enable $true
+                New-SmbShare -Name $elemento -Path F:\carpeta -ReadAccess todos
+                New-PSDrive -Name $elemento -PSProvider FileSystem -Root \\localhost\hospital
+                cd hospital:/
+                Start-Sleep -Seconds 5
+            }
+            pause;
+            break
+
+        }
+
+        6 {"Exit"; break}
+        default {Write-Host -ForegroundColor red -BackgroundColor white "Invalid option. Please select another option";pause}
+        
+    }
+
+showmenu
+}
+```
